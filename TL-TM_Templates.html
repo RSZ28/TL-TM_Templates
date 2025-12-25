@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            body{
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                font-size: 11pt;
+                user-select:  text;
+            }
+
+            footer, a{
+                user-select: none;
+            }
+
+            textarea{
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                font-size: 11pt;
+                width: 400px; 
+                height: 150px;
+            }
+
+            .reloj{
+                font-size: 15px;
+                font-family: 'Segoe UI', sans-serif;
+                margin: 11px 0;
+            }
+
+            .tab-buttons {
+            display: flex;
+            margin-bottom: 10px;
+            }
+
+            .subtab-buttons {
+            display: flex;
+            margin-bottom: 10px;
+            }
+
+            .generated-text{                
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                font-size: 11pt;
+                user-select: text;
+                border: 1px solid #ccc;
+                padding: 10px;
+                cursor: text;
+            }
+
+            .generated-link a {
+                user-select: text; /* Asegura que los enlaces también puedan seleccionarse */
+                color: blue;
+                text-decoration: underline;            
+            }
+
+            .generated-link a:focus {
+                outline: none;
+            }
+
+            .tab-buttons button {
+            padding: 10px 20px;
+            border: 1px solid #ccc;
+            background-color: #eee;
+            cursor: pointer;
+            margin-right: 5px;
+            }
+
+            .subtab-buttons button {
+            padding: 10px 20px;
+            border: 1px solid #ccc;
+            background-color: #eee;
+            cursor: pointer;
+            margin-right: 5px;
+            }
+
+            .tab-buttons button.active {
+            background-color: #ddd;
+            font-weight: bold;
+            }
+
+            .subtab-buttons button.active {
+            background-color: #ddd;
+            font-weight: bold;
+            }
+
+            .tab-content {
+            display: none;
+            border: 1px solid #ccc;
+            padding: 15px;
+            }
+
+            .subtab-content {
+            display: none;            
+            padding: 15px;
+            }
+
+            .tab-content.active {
+            display: block;
+            }
+
+            .subtab-content.active {
+            display: block;
+            }
+
+            .texto-copiable {
+                border: 1px solid #ccc;
+                padding: 10px;
+                width: fit-content;
+                user-select: text; /* permite seleccionar el texto */
+            }
+
+        </style>
+        <title>Intune Templates</title>        
+        <link rel="stylesheet" href="style.css">
+        <script>
+            var templatesContent = {};
+            function SetDate(){
+            let alias = document.getElementById("eAlias").value;
+            const date = new Date();
+                const nDate = date.toLocaleDateString('en-US', {
+                    year: "numeric",
+                    month:'2-digit',
+                    day: '2-digit'
+                });
+            return nDate;
+            }
+            async function GetTemplates(){
+                const url = 'https://raw.githubusercontent.com/RSZ28/Templates_Content/refs/heads/main/Templates_Content.json';
+
+                try{
+                    const rsp = await fetch(url);
+                    if(!rsp.ok) throw new Error('Download Error');
+
+                    const txt = await rsp.text();
+                    txt.replace(//,"\n");
+                    //console.log(txt);
+                    //const temp = "[" + txt.trim().replace(/,\s*$/,"") + "]";                    
+                    const tmpJSON = JSON.parse(txt);
+
+                    tmpJSON.forEach(i => {
+                        templatesContent[i.Columna1] = i.Columna2;
+                    });
+
+                    
+                } catch(error){
+                    console.error('Error: ',error);
+                }
+
+                //console.log(templatesContent);
+            }
+
+            function boldString(str , substr){
+                strRegExp = new RegExp(substr, 'g');
+                return str.replace(strRegExp, '<b>'+substr+'</b>');
+            }
+
+            document.addEventListener("DOMContentLoaded", function() {
+                //GetTemplates();
+                //SetName();
+                function actualizarRelojes() {
+                let date = new Date();
+                let ahora;
+                const zonas = [
+                    { id: 'pst', zona: 'America/Los_Angeles', nombre: 'Pacific Standard Time (PST)' },
+                    { id: 'ast', zona: 'America/Puerto_Rico', nombre: 'Atlantic Standard Time (AST)' },
+                    { id: 'mst', zona: 'America/Denver', nombre: 'Mountain Standard Time (MST)' },
+                    { id: 'cst', zona: 'America/Chicago', nombre: 'Central Standar Time (CST)' },
+                    { id: 'est', zona: 'America/New_York', nombre: 'Easter Standard Time (EST)' },
+                    { id: 'nic', zona: 'America/Managua', nombre: 'Hora Nicaragua'},
+                    { id: 'chl', zona: 'America/Santiago', nombre:'Hora de Chile'},
+                    { id: 'col', zona: 'America/Bogota', nombre:'Hora de Colombia'},
+                ];
+
+                zonas.forEach(({ id, zona, nombre }) => {
+                    ahora = date.toLocaleTimeString('en-US', {
+                    timeZone: zona,
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                    });
+                    document.getElementById(id).textContent = `${nombre}: ${ahora}`;
+                });                
+            }
+            //ShowIM();
+            //Look4Cases();
+            setInterval(actualizarRelojes, 1000);
+            actualizarRelojes();
+            });
+
+            function ShowRes(){
+                document.getElementById("res").style.display = "block";
+            }
+        </script>
+    </head>    
+    <body>
+        <h1>Intune TM-TL Templates</h1>        
+        <fieldset style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <legend><b>Time Zones</b></legend>
+            <fieldset>
+                <div class="reloj" id="nic"></div>
+                <div class="reloj" id="chl"></div>
+                <div class="reloj" id="col"></div>
+                <div class="reloj" id="ast"></div>
+            </fieldset>
+            <fieldset>
+                <div class="reloj" id="pst"></div>
+                <div class="reloj" id="cst"></div>
+                <div class="reloj" id="est"></div>
+                <div class="reloj" id="mst"></div> 
+            </fieldset>
+        </fieldset>
+        <fieldset>
+            <legend><b>Engineer V-Alias</b></legend>
+            <div>
+                <legend>V-Alias: <input id="eAlias" placeholder="Here goes your Alias" onchange="SetDate()"></legend>
+            </div>
+        </fieldset>
+        <!-- <fieldset style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;"> -->
+        <fieldset>
+            <fieldset>
+                <legend><b>Case Information</b></legend>
+                
+                <div>
+                    Client's name:
+                    <input type="text" id="clientNameF" placeholder="Here goes the client's name">
+                </div>
+                <div>
+                    Case number: 
+                    <style>
+                        input[type=number]::-webkit-inner-spin-button,
+                        input[type=number]::-webkit-outer-spin-button{
+                            -webkit-appearance: none;
+                            margin: 0;
+                        }
+
+                        input[type=number]{
+                            appearance: textfield;
+                        }
+                    </style>
+                    <input type="number" id="caseNumF" placeholder="Here goes the case number">
+                </div>
+                <div>
+                    Client's Email:
+                    <input type="email" id="clientEmailF" placeholder="Here goes the client's email">
+                </div>
+                <div>
+                    Client's Phone Number:
+                    <input type="text" id="clientPhoneF" placeholder="Here goes the client's phone">
+                </div>
+                <legend>Case Languange:</legend>
+                <div>
+                    <input type="radio" id="eng" name="language" value="eng" checked="True">
+                    <label for="eng">English</label>
+                    <input type="radio" id="esp" name="language" value="esp">
+                    <label for="esp">Spanish</label>
+                </div>
+                <button onclick="ClearFields()">Clear Fields</button>
+                <script>
+                    const slaLanguage = document.querySelectorAll('input[name="language"]');
+                    const cKName = document.getElementById("nameRes");
+                    const cName = document.getElementById("clientNameF");
+                    const cNumber = document.getElementById("caseNumF");
+                    const cEmail = document.getElementById("clientEmailF");
+                    const cPhone = document.getElementById("clientPhoneF");
+
+                    function ClearFields(){
+                        cNumber.value = "";
+                        cEmail.value = "";
+                        cPhone.value = "";
+                        if(cKName.checked === true) {
+                            cName.value = "";
+                        }
+                        //slaLanguage.forEach(r => r.checked = false);
+                    }
+                </script>
+            </fieldset>
+            <fieldset style="display: none;">
+                <legend><b>Stored Cases</b></legend>
+                <div id="storedC">
+
+                </div>
+                <script>
+                    function ClearButtonsPane(){
+                        const casesPane = document.getElementById("storedC");
+
+                        casesPane.childNodes.forEach(function (c) {
+                            casesPane.removeChild(c)
+                        });
+
+                    }
+
+                    function Look4Cases(){
+                        const allKeys = Object.keys(localStorage);
+                        const casesPane = document.getElementById("storedC");
+
+                        ClearButtonsPane();
+
+                        if(allKeys.length > 0){
+                            for(let i=0; i<allKeys.length;i++){
+                                let C = JSON.parse(localStorage.getItem(allKeys[i]));
+                                let btn = document.createElement("button");
+                                btn.name = C.cNumber;
+                                btn.textContent = "Case: "+C.cNumber;
+                                
+                                btn.onclick = function () {GetCase(btn);};
+                                casesPane.appendChild(btn);
+                            }
+                        }
+                    }
+                </script>
+            </fieldset>
+        </fieldset>
+
+        <div class="tab-buttons">
+            <button class="tab-btn active" data-tab="tab1" onclick="ShowRes()">Transfer Note</button>
+            <button class="tab-btn" data-tab="tab2" onclick="GetNote()">Follow up Note</button>
+        </div>
+
+        <div class="tab-content active" id="tab1">
+            <fieldset>
+                <legend>Transfer Note Information</legend>
+                <div>
+                    <b>Case Information:</b><br>
+                    <textarea id="info"></textarea><br>
+                    <b>Why is not Intune related: </b><br>
+                    <textarea id="notRel"></textarea><br>
+                    <b>Why is being transferred:</b><br>
+                    <textarea id="transf"></textarea><br>
+                    <b>SAP:</b>
+                    <input type="text" id="SAP" placeholder="Here goest the SAP">
+                </div>
+            </fieldset>
+
+            </fieldset>
+            <script>
+                function IntuneRelated(){
+                    let check = document.getElementById("intuneRel").checked;
+                    let related = document.getElementById("rel");
+
+                    if(check === true) {
+                        related.style.display = "block";
+                    }
+                    else related.style.display = "none";
+                }
+
+                function GenerateTransfr(){
+                    let alias = document.getElementById("eAlias").value;
+                    let inf = document.getElementById("info").value;
+                    let notRel = document.getElementById("notRel").value;
+                    let trn = document.getElementById("transf").value;
+                    let sap = document.getElementById("SAP").value;
+
+                    let template = "<b>Tech Lead | "+alias+" | "+SetDate()+"</b>\n\n"+
+                    "<b>Case Information:</b>\n"+inf+"\n\n"+
+                    "<b>Why is not Intune related:</b>\n"+notRel+"\n\n"+
+                    "<b>Why is being transferred:</b>\n"+trn+"\n\n"+
+                    "<b>SAP:</b>"+sap+"\n\n";
+
+                    document.getElementById("result").innerHTML = template.replace(/\n/g,"<br>");
+                }
+
+            </script>
+            <button onclick="GenerateTransfr()">Generate</button>
+        </div>
+        
+        <div class="tab-content" id="tab2">
+            <fieldset id="FU">
+
+            </fieldset`>
+            <script>
+                function GetNote(){
+                    let alias = document.getElementById("eAlias").value;
+
+                    document.getElementById("res").style.display = "none";
+
+                    template = "<b>Tech Lead | "+alias+" | "+SetDate()+"</b>\n\n"+
+                    "<ul>"+
+                    "<li>Ambassador successfully completed the Follow Up Process</li>"+
+                    "<li>Customer didn't respond at any follow up</li>"+
+                    `<li>Case can be closed as "Unresponsive" after the 24h period is completed</li>`+
+                    "</ul>";
+
+                    document.getElementById("FU").innerHTML = template.replace(/\n/g,"<br>");
+                }
+            </script>
+        </div>
+        
+        <fieldset id="res">
+            <fieldset>
+                <div id="result"></div>
+            </fieldset>
+        </fieldset>
+
+        <script>
+            const subButtons = document.querySelectorAll('.subtab-btn');
+            const subContents = document.querySelectorAll('.subtab-content');
+            const buttons = document.querySelectorAll('.tab-btn');
+            const contents = document.querySelectorAll('.tab-content');
+
+            subButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Quitar clase activa de todos
+                    subButtons.forEach(btn => btn.classList.remove('active'));
+                    subContents.forEach(content => content.classList.remove('active'));
+
+                    // Activar el seleccionado
+                    button.classList.add('active');
+                    document.getElementById(button.dataset.tab).classList.add('active');
+                });
+            });
+
+            buttons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Quitar clase activa de todos
+                    buttons.forEach(btn => btn.classList.remove('active'));
+                    contents.forEach(content => content.classList.remove('active'));
+
+                    // Activar el seleccionado
+                    button.classList.add('active');
+                    document.getElementById(button.dataset.tab).classList.add('active');
+                });
+            });
+        </script>
+    </body>
+</html>
